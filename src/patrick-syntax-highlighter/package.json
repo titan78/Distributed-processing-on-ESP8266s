@@ -1,0 +1,25 @@
+{
+  "name": "patrick",
+  "displayName": "Patrick",
+  "description": ".pt",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.73.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "patrick",
+      "aliases": ["patrick", "patrick"],
+      "extensions": [".pt"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "patrick",
+      "scopeName": "source.pt",
+      "path": "./syntaxes/patrick.tmLanguage.json"
+    }]
+  }
+}

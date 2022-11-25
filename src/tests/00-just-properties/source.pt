@@ -1,0 +1,78 @@
+
+/** ===================================================
+ *
+ *                  Patrick Language
+ *
+ *  =================================================== */
+
+declare: int number1       /** declaration **/
+declare: int number2 = 30  /** declaration and initialization **/
+
+syscall: print(number2)    /** syatem call **/
+number1 = 50               /** change variable **/
+
+if: number1 >= 10
+{
+    .........
+}
+else:
+{
+    .........
+}
+
+function: factorial(int number)
+{
+    number *= 10
+}
+
+branch_to: CPU3
+{
+    .........
+}
+
+branch_to: auto 
+{
+    .........
+}
+
+if: CPU_ID == 0
+{
+    loop: i = 1 up_to CPUS, step = 1
+    {
+        branch_to: CPU__i
+        {
+            .........
+        }
+    }
+}
+
+function: factorial(lint number) => int
+{
+    declare: llint fact = 1
+
+    if: number <= fact
+    {
+        return: fact
+    }
+
+    loop: i = 1 up_to_eq number, step = 1
+    {
+        fact *= i
+    }
+
+    return: fact
+}
+
+branch_to: CPU3
+{
+    loop: i = 1 up_to_eq 100, step = 1
+    {
+        declare: int fact = factorial(i)
+        syscall: print(fact)
+    }
+    /**
+     *  The implementation of the factorial function is in CPU0, so this is where
+     *  Cloud Linker comes into play.
+     *  The print function is a system request and does not need Cloud Linker, it is managed by the platform
+     **/
+}

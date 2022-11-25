@@ -1,0 +1,795 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "patrick",
+	"patterns": [
+		{
+			"include": "#keywords"
+		},
+		{
+			"include": "#strings"
+		},
+		{ "include": "#constants" },
+		{ "include": "#constant2s" },
+		{ "include": "#storages" },
+		{ "include": "#platforms" },
+		{ "include": "#comments" },
+		{ "include": "#cpuis" }
+	],
+	"repository": {
+		"keywords": {
+			"patterns": [{
+				"name": "keyword.control.patrick",
+				"match": "\\b(if|else|switch|case|loop|branch_to|declare|return|invoke|function|syscall)\\b"
+		},
+		{
+			"include": "#operators"
+		},
+		{
+			"match": "\\b(true|false)\\b",
+			"name": "constant.language"
+		}]
+		},
+		"strings": {
+			"name": "string.quoted.double.patrick",
+			"begin": "\"",
+			"end": "\"",
+			"patterns": [
+				{
+					"name": "constant.character.escape.patrick",
+					"match": "\\\\."
+				}
+			]
+		},
+		"constants": {
+			"patterns": [{
+				"name": "constant.numeric",
+				"match": "\\b(\\d+)\\b"
+			}]
+		},
+		"constant2s": {
+			"patterns": [{
+				"name": "invalid.illegal",
+				"match": "\\b(up_to|up_to_eq|down_to|down_to_eq|step)\\b"
+			}]
+		},
+		"cpuis": {
+			"patterns": [{
+				"name": "string.quoted.double.patrick",
+				"match": "\\b(CPU__[A-z]+)\\b"
+			}]
+		},
+		"storages":{
+			"patterns": [{
+				"name": "storage.type",
+				"match": "\\b(int|lint|llint|uint|F32|F64|void|auto)\\b"
+			}]
+		},
+		"platforms":{
+			"patterns": [{
+				"name": "markup.bold",
+				"match": "\\b(CPU|CPU\\d+|CPUS|CPU%|CPU_ID|print)\\b"
+			}]
+		},
+		"comments": {
+			"patterns": [
+				{
+					"begin": "^(?:(?:\\s)+)?+(\\/\\/[!\\/]+)",
+					"end": "(?<=\\n)(?<!\\\\\\n)",
+					"beginCaptures": {
+						"1": {
+							"name": "punctuation.definition.comment.documentation.cpp"
+						}
+					},
+					"endCaptures": {},
+					"name": "comment.line.double-slash.documentation.cpp",
+					"patterns": [
+						{
+							"include": "#line_continuation_character"
+						},
+						{
+							"match": "(?<=[\\s*!\\/])[\\\\@](?:callergraph|callgraph|else|endif|f\\$|f\\[|f\\]|hidecallergraph|hidecallgraph|hiderefby|hiderefs|hideinitializer|htmlinclude|n|nosubgrouping|private|privatesection|protected|protectedsection|public|publicsection|pure|showinitializer|showrefby|showrefs|tableofcontents|\\$|\\#|<|>|%|\"|\\.|=|::|\\||\\-\\-|\\-\\-\\-)\\b(?:\\{[^}]*\\})?",
+							"name": "storage.type.class.doxygen.cpp"
+						},
+						{
+							"match": "((?<=[\\s*!\\/])[\\\\@](?:a|em|e))(?:\\s)+(\\S+)",
+							"captures": {
+								"1": {
+									"name": "storage.type.class.doxygen.cpp"
+								},
+								"2": {
+									"name": "markup.italic.doxygen.cpp"
+								}
+							}
+						},
+						{
+							"match": "((?<=[\\s*!\\/])[\\\\@]b)(?:\\s)+(\\S+)",
+							"captures": {
+								"1": {
+									"name": "storage.type.class.doxygen.cpp"
+								},
+								"2": {
+									"name": "markup.bold.doxygen.cpp"
+								}
+							}
+						},
+						{
+							"match": "((?<=[\\s*!\\/])[\\\\@](?:c|p))(?:\\s)+(\\S+)",
+							"captures": {
+								"1": {
+									"name": "storage.type.class.doxygen.cpp"
+								},
+								"2": {
+									"name": "markup.inline.raw.string.cpp"
+								}
+							}
+						},
+						{
+							"match": "(?<=[\\s*!\\/])[\\\\@](?:a|anchor|b|c|cite|copybrief|copydetail|copydoc|def|dir|dontinclude|e|em|emoji|enum|example|extends|file|idlexcept|implements|include|includedoc|includelineno|latexinclude|link|memberof|namespace|p|package|ref|refitem|related|relates|relatedalso|relatesalso|verbinclude)\\b(?:\\{[^}]*\\})?",
+							"name": "storage.type.class.doxygen.cpp"
+						},
+						{
+							"match": "(?<=[\\s*!\\/])[\\\\@](?:addindex|addtogroup|category|class|defgroup|diafile|dotfile|elseif|fn|headerfile|if|ifnot|image|ingroup|interface|line|mainpage|mscfile|name|overload|page|property|protocol|section|skip|skipline|snippet|snippetdoc|snippetlineno|struct|subpage|subsection|subsubsection|typedef|union|until|vhdlflow|weakgroup)\\b(?:\\{[^}]*\\})?",
+							"name": "storage.type.class.doxygen.cpp"
+						},
+						{
+							"match": "((?<=[\\s*!\\/])[\\\\@]param)(?:\\s*\\[((?:,?(?:(?:\\s)+)?(?:in|out)(?:(?:\\s)+)?)+)\\])?(?:\\s)+(\\b\\w+\\b)",
+							"captures": {
+								"1": {
+									"name": "storage.type.class.doxygen.cpp"
+								},
+								"2": {
+									"patterns": [
+										{
+											"match": "in|out",
+											"name": "keyword.other.parameter.direction.$0.cpp"
+										}
+									]
+								},
+								"3": {
+									"name": "variable.parameter.cpp"
+								}
+							}
+						},
+						{
+							"match": "(?<=[\\s*!\\/])[\\\\@](?:arg|attention|author|authors|brief|bug|copyright|date|deprecated|details|exception|invariant|li|note|par|paragraph|param|post|pre|remark|remarks|result|return|returns|retval|sa|see|short|since|test|throw|throws|todo|tparam|version|warning|xrefitem)\\b(?:\\{[^}]*\\})?",
+							"name": "storage.type.class.doxygen.cpp"
+						},
+						{
+							"match": "(?<=[\\s*!\\/])[\\\\@](?:code|cond|docbookonly|dot|htmlonly|internal|latexonly|link|manonly|msc|parblock|rtfonly|secreflist|startuml|verbatim|xmlonly|endcode|endcond|enddocbookonly|enddot|endhtmlonly|endinternal|endlatexonly|endlink|endmanonly|endmsc|endparblock|endrtfonly|endsecreflist|enduml|endverbatim|endxmlonly)\\b(?:\\{[^}]*\\})?",
+							"name": "storage.type.class.doxygen.cpp"
+						},
+						{
+							"match": "(?:\\b[A-Z]+:|@[a-z_]+:)",
+							"name": "storage.type.class.gtkdoc.cpp"
+						}
+					]
+				},
+				{
+					"match": "(\\/\\*[!*]+(?=\\s))(.+)([!*]*\\*\\/)",
+					"captures": {
+						"1": {
+							"name": "punctuation.definition.comment.begin.documentation.cpp"
+						},
+						"2": {
+							"patterns": [
+								{
+									"match": "(?<=[\\s*!\\/])[\\\\@](?:callergraph|callgraph|else|endif|f\\$|f\\[|f\\]|hidecallergraph|hidecallgraph|hiderefby|hiderefs|hideinitializer|htmlinclude|n|nosubgrouping|private|privatesection|protected|protectedsection|public|publicsection|pure|showinitializer|showrefby|showrefs|tableofcontents|\\$|\\#|<|>|%|\"|\\.|=|::|\\||\\-\\-|\\-\\-\\-)\\b(?:\\{[^}]*\\})?",
+									"name": "storage.type.class.doxygen.cpp"
+								},
+								{
+									"match": "((?<=[\\s*!\\/])[\\\\@](?:a|em|e))(?:\\s)+(\\S+)",
+									"captures": {
+										"1": {
+											"name": "storage.type.class.doxygen.cpp"
+										},
+										"2": {
+											"name": "markup.italic.doxygen.cpp"
+										}
+									}
+								},
+								{
+									"match": "((?<=[\\s*!\\/])[\\\\@]b)(?:\\s)+(\\S+)",
+									"captures": {
+										"1": {
+											"name": "storage.type.class.doxygen.cpp"
+										},
+										"2": {
+											"name": "markup.bold.doxygen.cpp"
+										}
+									}
+								},
+								{
+									"match": "((?<=[\\s*!\\/])[\\\\@](?:c|p))(?:\\s)+(\\S+)",
+									"captures": {
+										"1": {
+											"name": "storage.type.class.doxygen.cpp"
+										},
+										"2": {
+											"name": "markup.inline.raw.string.cpp"
+										}
+									}
+								},
+								{
+									"match": "(?<=[\\s*!\\/])[\\\\@](?:a|anchor|b|c|cite|copybrief|copydetail|copydoc|def|dir|dontinclude|e|em|emoji|enum|example|extends|file|idlexcept|implements|include|includedoc|includelineno|latexinclude|link|memberof|namespace|p|package|ref|refitem|related|relates|relatedalso|relatesalso|verbinclude)\\b(?:\\{[^}]*\\})?",
+									"name": "storage.type.class.doxygen.cpp"
+								},
+								{
+									"match": "(?<=[\\s*!\\/])[\\\\@](?:addindex|addtogroup|category|class|defgroup|diafile|dotfile|elseif|fn|headerfile|if|ifnot|image|ingroup|interface|line|mainpage|mscfile|name|overload|page|property|protocol|section|skip|skipline|snippet|snippetdoc|snippetlineno|struct|subpage|subsection|subsubsection|typedef|union|until|vhdlflow|weakgroup)\\b(?:\\{[^}]*\\})?",
+									"name": "storage.type.class.doxygen.cpp"
+								},
+								{
+									"match": "((?<=[\\s*!\\/])[\\\\@]param)(?:\\s*\\[((?:,?(?:(?:\\s)+)?(?:in|out)(?:(?:\\s)+)?)+)\\])?(?:\\s)+(\\b\\w+\\b)",
+									"captures": {
+										"1": {
+											"name": "storage.type.class.doxygen.cpp"
+										},
+										"2": {
+											"patterns": [
+												{
+													"match": "in|out",
+													"name": "keyword.other.parameter.direction.$0.cpp"
+												}
+											]
+										},
+										"3": {
+											"name": "variable.parameter.cpp"
+										}
+									}
+								},
+								{
+									"match": "(?<=[\\s*!\\/])[\\\\@](?:arg|attention|author|authors|brief|bug|copyright|date|deprecated|details|exception|invariant|li|note|par|paragraph|param|post|pre|remark|remarks|result|return|returns|retval|sa|see|short|since|test|throw|throws|todo|tparam|version|warning|xrefitem)\\b(?:\\{[^}]*\\})?",
+									"name": "storage.type.class.doxygen.cpp"
+								},
+								{
+									"match": "(?<=[\\s*!\\/])[\\\\@](?:code|cond|docbookonly|dot|htmlonly|internal|latexonly|link|manonly|msc|parblock|rtfonly|secreflist|startuml|verbatim|xmlonly|endcode|endcond|enddocbookonly|enddot|endhtmlonly|endinternal|endlatexonly|endlink|endmanonly|endmsc|endparblock|endrtfonly|endsecreflist|enduml|endverbatim|endxmlonly)\\b(?:\\{[^}]*\\})?",
+									"name": "storage.type.class.doxygen.cpp"
+								},
+								{
+									"match": "(?:\\b[A-Z]+:|@[a-z_]+:)",
+									"name": "storage.type.class.gtkdoc.cpp"
+								}
+							]
+						},
+						"3": {
+							"name": "punctuation.definition.comment.end.documentation.cpp"
+						}
+					},
+					"name": "comment.block.documentation.cpp"
+				},
+				{
+					"begin": "(?:(?:\\s)+)?+\\/\\*[!*]+(?:(?:(?:\\n)|$)|(?=\\s))",
+					"end": "[!*]*\\*\\/",
+					"beginCaptures": {
+						"0": {
+							"name": "punctuation.definition.comment.begin.documentation.cpp"
+						}
+					},
+					"endCaptures": {
+						"0": {
+							"name": "punctuation.definition.comment.end.documentation.cpp"
+						}
+					},
+					"name": "comment.block.documentation.cpp",
+					"patterns": [
+						{
+							"match": "(?<=[\\s*!\\/])[\\\\@](?:callergraph|callgraph|else|endif|f\\$|f\\[|f\\]|hidecallergraph|hidecallgraph|hiderefby|hiderefs|hideinitializer|htmlinclude|n|nosubgrouping|private|privatesection|protected|protectedsection|public|publicsection|pure|showinitializer|showrefby|showrefs|tableofcontents|\\$|\\#|<|>|%|\"|\\.|=|::|\\||\\-\\-|\\-\\-\\-)\\b(?:\\{[^}]*\\})?",
+							"name": "storage.type.class.doxygen.cpp"
+						},
+						{
+							"match": "((?<=[\\s*!\\/])[\\\\@](?:a|em|e))(?:\\s)+(\\S+)",
+							"captures": {
+								"1": {
+									"name": "storage.type.class.doxygen.cpp"
+								},
+								"2": {
+									"name": "markup.italic.doxygen.cpp"
+								}
+							}
+						},
+						{
+							"match": "((?<=[\\s*!\\/])[\\\\@]b)(?:\\s)+(\\S+)",
+							"captures": {
+								"1": {
+									"name": "storage.type.class.doxygen.cpp"
+								},
+								"2": {
+									"name": "markup.bold.doxygen.cpp"
+								}
+							}
+						},
+						{
+							"match": "((?<=[\\s*!\\/])[\\\\@](?:c|p))(?:\\s)+(\\S+)",
+							"captures": {
+								"1": {
+									"name": "storage.type.class.doxygen.cpp"
+								},
+								"2": {
+									"name": "markup.inline.raw.string.cpp"
+								}
+							}
+						},
+						{
+							"match": "(?<=[\\s*!\\/])[\\\\@](?:a|anchor|b|c|cite|copybrief|copydetail|copydoc|def|dir|dontinclude|e|em|emoji|enum|example|extends|file|idlexcept|implements|include|includedoc|includelineno|latexinclude|link|memberof|namespace|p|package|ref|refitem|related|relates|relatedalso|relatesalso|verbinclude)\\b(?:\\{[^}]*\\})?",
+							"name": "storage.type.class.doxygen.cpp"
+						},
+						{
+							"match": "(?<=[\\s*!\\/])[\\\\@](?:addindex|addtogroup|category|class|defgroup|diafile|dotfile|elseif|fn|headerfile|if|ifnot|image|ingroup|interface|line|mainpage|mscfile|name|overload|page|property|protocol|section|skip|skipline|snippet|snippetdoc|snippetlineno|struct|subpage|subsection|subsubsection|typedef|union|until|vhdlflow|weakgroup)\\b(?:\\{[^}]*\\})?",
+							"name": "storage.type.class.doxygen.cpp"
+						},
+						{
+							"match": "((?<=[\\s*!\\/])[\\\\@]param)(?:\\s*\\[((?:,?(?:(?:\\s)+)?(?:in|out)(?:(?:\\s)+)?)+)\\])?(?:\\s)+(\\b\\w+\\b)",
+							"captures": {
+								"1": {
+									"name": "storage.type.class.doxygen.cpp"
+								},
+								"2": {
+									"patterns": [
+										{
+											"match": "in|out",
+											"name": "keyword.other.parameter.direction.$0.cpp"
+										}
+									]
+								},
+								"3": {
+									"name": "variable.parameter.cpp"
+								}
+							}
+						},
+						{
+							"match": "(?<=[\\s*!\\/])[\\\\@](?:arg|attention|author|authors|brief|bug|copyright|date|deprecated|details|exception|invariant|li|note|par|paragraph|param|post|pre|remark|remarks|result|return|returns|retval|sa|see|short|since|test|throw|throws|todo|tparam|version|warning|xrefitem)\\b(?:\\{[^}]*\\})?",
+							"name": "storage.type.class.doxygen.cpp"
+						},
+						{
+							"match": "(?<=[\\s*!\\/])[\\\\@](?:code|cond|docbookonly|dot|htmlonly|internal|latexonly|link|manonly|msc|parblock|rtfonly|secreflist|startuml|verbatim|xmlonly|endcode|endcond|enddocbookonly|enddot|endhtmlonly|endinternal|endlatexonly|endlink|endmanonly|endmsc|endparblock|endrtfonly|endsecreflist|enduml|endverbatim|endxmlonly)\\b(?:\\{[^}]*\\})?",
+							"name": "storage.type.class.doxygen.cpp"
+						},
+						{
+							"match": "(?:\\b[A-Z]+:|@[a-z_]+:)",
+							"name": "storage.type.class.gtkdoc.cpp"
+						}
+					]
+				},
+				{
+					"include": "#emacs_file_banner"
+				},
+				{
+					"include": "#block_comment"
+				},
+				{
+					"include": "#line_comment"
+				},
+				{
+					"include": "#invalid_comment_end"
+				}
+			]
+		},
+		"inline_comment": {
+			"match": "(\\/\\*)((?:[^\\*]++|\\*+(?!\\/))*+(\\*\\/))",
+			"captures": {
+				"1": {
+					"name": "comment.block.cpp punctuation.definition.comment.begin.cpp"
+				},
+				"2": {
+					"name": "comment.block.cpp"
+				},
+				"3": {
+					"name": "comment.block.cpp punctuation.definition.comment.end.cpp"
+				}
+			}
+		},
+		"invalid_comment_end": {
+			"match": "\\*\\/",
+			"name": "invalid.illegal.unexpected.punctuation.definition.comment.end.cpp"
+		},
+		"line_comment": {
+			"begin": "\\s*+(\\/\\/)",
+			"end": "(?<!\\\\)(?:(?=\\n)|(?<=^\\n|[^\\\\]\\n)(?=$))",
+			"beginCaptures": {
+				"1": {
+					"name": "punctuation.definition.comment.cpp"
+				}
+			},
+			"endCaptures": {},
+			"name": "comment.line.double-slash.cpp",
+			"patterns": [
+				{
+					"include": "#line_continuation_character"
+				}
+			]
+		},
+		"number_literal": {
+			"match": "(?<!\\w)\\.?\\d(?:(?:[0-9a-zA-Z_\\.]|')|(?<=[eEpP])[+-])*",
+			"captures": {
+				"0": {
+					"patterns": [
+						{
+							"begin": "(?=.)",
+							"end": "$",
+							"beginCaptures": {},
+							"endCaptures": {},
+							"patterns": [
+								{
+									"match": "(\\G0[xX])([0-9a-fA-F](?:[0-9a-fA-F]|((?<=[0-9a-fA-F])'(?=[0-9a-fA-F])))*)?((?:(?<=[0-9a-fA-F])\\.|\\.(?=[0-9a-fA-F])))([0-9a-fA-F](?:[0-9a-fA-F]|((?<=[0-9a-fA-F])'(?=[0-9a-fA-F])))*)?(?:(?<!')([pP])((?:\\+)?)((?:\\-)?)([0-9](?:[0-9]|(?<=[0-9a-fA-F])'(?=[0-9a-fA-F]))*))?([lLfF](?!\\w))?((?:\\w(?<![0-9a-fA-FpP])\\w*)?$)",
+									"captures": {
+										"1": {
+											"name": "keyword.other.unit.hexadecimal.cpp"
+										},
+										"2": {
+											"name": "constant.numeric.hexadecimal.cpp",
+											"patterns": [
+												{
+													"match": "(?<=[0-9a-fA-F])'(?=[0-9a-fA-F])",
+													"name": "punctuation.separator.constant.numeric.cpp"
+												}
+											]
+										},
+										"3": {
+											"name": "punctuation.separator.constant.numeric.cpp"
+										},
+										"4": {
+											"name": "constant.numeric.hexadecimal.cpp"
+										},
+										"5": {
+											"name": "constant.numeric.hexadecimal.cpp",
+											"patterns": [
+												{
+													"match": "(?<=[0-9a-fA-F])'(?=[0-9a-fA-F])",
+													"name": "punctuation.separator.constant.numeric.cpp"
+												}
+											]
+										},
+										"6": {
+											"name": "punctuation.separator.constant.numeric.cpp"
+										},
+										"7": {
+											"name": "keyword.other.unit.exponent.hexadecimal.cpp"
+										},
+										"8": {
+											"name": "keyword.operator.plus.exponent.hexadecimal.cpp"
+										},
+										"9": {
+											"name": "keyword.operator.minus.exponent.hexadecimal.cpp"
+										},
+										"10": {
+											"name": "constant.numeric.exponent.hexadecimal.cpp",
+											"patterns": [
+												{
+													"match": "(?<=[0-9a-fA-F])'(?=[0-9a-fA-F])",
+													"name": "punctuation.separator.constant.numeric.cpp"
+												}
+											]
+										},
+										"11": {
+											"name": "keyword.other.unit.suffix.floating-point.cpp"
+										},
+										"12": {
+											"name": "keyword.other.unit.user-defined.cpp"
+										}
+									}
+								},
+								{
+									"match": "\\G(?=[0-9.])(?!0[xXbB])([0-9](?:[0-9]|((?<=[0-9a-fA-F])'(?=[0-9a-fA-F])))*)?((?:(?<=[0-9])\\.|\\.(?=[0-9])))([0-9](?:[0-9]|((?<=[0-9a-fA-F])'(?=[0-9a-fA-F])))*)?(?:(?<!')([eE])((?:\\+)?)((?:\\-)?)([0-9](?:[0-9]|(?<=[0-9a-fA-F])'(?=[0-9a-fA-F]))*))?([lLfF](?!\\w))?((?:\\w(?<![0-9eE])\\w*)?$)",
+									"captures": {
+										"1": {
+											"name": "constant.numeric.decimal.cpp",
+											"patterns": [
+												{
+													"match": "(?<=[0-9a-fA-F])'(?=[0-9a-fA-F])",
+													"name": "punctuation.separator.constant.numeric.cpp"
+												}
+											]
+										},
+										"2": {
+											"name": "punctuation.separator.constant.numeric.cpp"
+										},
+										"3": {
+											"name": "constant.numeric.decimal.point.cpp"
+										},
+										"4": {
+											"name": "constant.numeric.decimal.cpp",
+											"patterns": [
+												{
+													"match": "(?<=[0-9a-fA-F])'(?=[0-9a-fA-F])",
+													"name": "punctuation.separator.constant.numeric.cpp"
+												}
+											]
+										},
+										"5": {
+											"name": "punctuation.separator.constant.numeric.cpp"
+										},
+										"6": {
+											"name": "keyword.other.unit.exponent.decimal.cpp"
+										},
+										"7": {
+											"name": "keyword.operator.plus.exponent.decimal.cpp"
+										},
+										"8": {
+											"name": "keyword.operator.minus.exponent.decimal.cpp"
+										},
+										"9": {
+											"name": "constant.numeric.exponent.decimal.cpp",
+											"patterns": [
+												{
+													"match": "(?<=[0-9a-fA-F])'(?=[0-9a-fA-F])",
+													"name": "punctuation.separator.constant.numeric.cpp"
+												}
+											]
+										},
+										"10": {
+											"name": "keyword.other.unit.suffix.floating-point.cpp"
+										},
+										"11": {
+											"name": "keyword.other.unit.user-defined.cpp"
+										}
+									}
+								},
+								{
+									"match": "(\\G0[bB])([01](?:[01]|((?<=[0-9a-fA-F])'(?=[0-9a-fA-F])))*)((?:[uU]|(?:[uU]ll?)|(?:[uU]LL?)|(?:ll?[uU]?)|(?:LL?[uU]?)|[fF])(?!\\w))?((?:\\w(?<![0-9])\\w*)?$)",
+									"captures": {
+										"1": {
+											"name": "keyword.other.unit.binary.cpp"
+										},
+										"2": {
+											"name": "constant.numeric.binary.cpp",
+											"patterns": [
+												{
+													"match": "(?<=[0-9a-fA-F])'(?=[0-9a-fA-F])",
+													"name": "punctuation.separator.constant.numeric.cpp"
+												}
+											]
+										},
+										"3": {
+											"name": "punctuation.separator.constant.numeric.cpp"
+										},
+										"4": {
+											"name": "keyword.other.unit.suffix.integer.cpp"
+										},
+										"5": {
+											"name": "keyword.other.unit.user-defined.cpp"
+										}
+									}
+								},
+								{
+									"match": "(\\G0)((?:[0-7]|((?<=[0-9a-fA-F])'(?=[0-9a-fA-F])))+)((?:[uU]|(?:[uU]ll?)|(?:[uU]LL?)|(?:ll?[uU]?)|(?:LL?[uU]?)|[fF])(?!\\w))?((?:\\w(?<![0-9])\\w*)?$)",
+									"captures": {
+										"1": {
+											"name": "keyword.other.unit.octal.cpp"
+										},
+										"2": {
+											"name": "constant.numeric.octal.cpp",
+											"patterns": [
+												{
+													"match": "(?<=[0-9a-fA-F])'(?=[0-9a-fA-F])",
+													"name": "punctuation.separator.constant.numeric.cpp"
+												}
+											]
+										},
+										"3": {
+											"name": "punctuation.separator.constant.numeric.cpp"
+										},
+										"4": {
+											"name": "keyword.other.unit.suffix.integer.cpp"
+										},
+										"5": {
+											"name": "keyword.other.unit.user-defined.cpp"
+										}
+									}
+								},
+								{
+									"match": "(\\G0[xX])([0-9a-fA-F](?:[0-9a-fA-F]|((?<=[0-9a-fA-F])'(?=[0-9a-fA-F])))*)(?:(?<!')([pP])((?:\\+)?)((?:\\-)?)([0-9](?:[0-9]|(?<=[0-9a-fA-F])'(?=[0-9a-fA-F]))*))?((?:[uU]|(?:[uU]ll?)|(?:[uU]LL?)|(?:ll?[uU]?)|(?:LL?[uU]?)|[fF])(?!\\w))?((?:\\w(?<![0-9a-fA-FpP])\\w*)?$)",
+									"captures": {
+										"1": {
+											"name": "keyword.other.unit.hexadecimal.cpp"
+										},
+										"2": {
+											"name": "constant.numeric.hexadecimal.cpp",
+											"patterns": [
+												{
+													"match": "(?<=[0-9a-fA-F])'(?=[0-9a-fA-F])",
+													"name": "punctuation.separator.constant.numeric.cpp"
+												}
+											]
+										},
+										"3": {
+											"name": "punctuation.separator.constant.numeric.cpp"
+										},
+										"4": {
+											"name": "keyword.other.unit.exponent.hexadecimal.cpp"
+										},
+										"5": {
+											"name": "keyword.operator.plus.exponent.hexadecimal.cpp"
+										},
+										"6": {
+											"name": "keyword.operator.minus.exponent.hexadecimal.cpp"
+										},
+										"7": {
+											"name": "constant.numeric.exponent.hexadecimal.cpp",
+											"patterns": [
+												{
+													"match": "(?<=[0-9a-fA-F])'(?=[0-9a-fA-F])",
+													"name": "punctuation.separator.constant.numeric.cpp"
+												}
+											]
+										},
+										"8": {
+											"name": "keyword.other.unit.suffix.integer.cpp"
+										},
+										"9": {
+											"name": "keyword.other.unit.user-defined.cpp"
+										}
+									}
+								},
+								{
+									"match": "\\G(?=[0-9.])(?!0[xXbB])([0-9](?:[0-9]|((?<=[0-9a-fA-F])'(?=[0-9a-fA-F])))*)(?:(?<!')([eE])((?:\\+)?)((?:\\-)?)([0-9](?:[0-9]|(?<=[0-9a-fA-F])'(?=[0-9a-fA-F]))*))?((?:[uU]|(?:[uU]ll?)|(?:[uU]LL?)|(?:ll?[uU]?)|(?:LL?[uU]?)|[fF])(?!\\w))?((?:\\w(?<![0-9eE])\\w*)?$)",
+									"captures": {
+										"1": {
+											"name": "constant.numeric.decimal.cpp",
+											"patterns": [
+												{
+													"match": "(?<=[0-9a-fA-F])'(?=[0-9a-fA-F])",
+													"name": "punctuation.separator.constant.numeric.cpp"
+												}
+											]
+										},
+										"2": {
+											"name": "punctuation.separator.constant.numeric.cpp"
+										},
+										"3": {
+											"name": "keyword.other.unit.exponent.decimal.cpp"
+										},
+										"4": {
+											"name": "keyword.operator.plus.exponent.decimal.cpp"
+										},
+										"5": {
+											"name": "keyword.operator.minus.exponent.decimal.cpp"
+										},
+										"6": {
+											"name": "constant.numeric.exponent.decimal.cpp",
+											"patterns": [
+												{
+													"match": "(?<=[0-9a-fA-F])'(?=[0-9a-fA-F])",
+													"name": "punctuation.separator.constant.numeric.cpp"
+												}
+											]
+										},
+										"7": {
+											"name": "keyword.other.unit.suffix.integer.cpp"
+										},
+										"8": {
+											"name": "keyword.other.unit.user-defined.cpp"
+										}
+									}
+								},
+								{
+									"match": "(?:(?:[0-9a-zA-Z_\\.]|')|(?<=[eEpP])[+-])+",
+									"name": "invalid.illegal.constant.numeric.cpp"
+								}
+							]
+						}
+					]
+				}
+			}
+		},"switch_conditional_parentheses": {
+			"begin": "((?:(?:(?:\\s*+(\\/\\*)((?:[^\\*]++|\\*+(?!\\/))*+(\\*\\/))\\s*+)+)|(?:\\s++)|(?<=\\W)|(?=\\W)|^|(?:\\n?$)|(?:\\A)|(?:\\Z)))(\\()",
+			"end": "\\)",
+			"beginCaptures": {
+				"1": {
+					"patterns": [
+						{
+							"include": "#inline_comment"
+						}
+					]
+				},
+				"2": {
+					"name": "comment.block.cpp punctuation.definition.comment.begin.cpp"
+				},
+				"3": {
+					"name": "comment.block.cpp"
+				},
+				"4": {
+					"name": "comment.block.cpp punctuation.definition.comment.end.cpp"
+				},
+				"5": {
+					"name": "punctuation.section.parens.begin.bracket.round.conditional.switch.cpp"
+				}
+			},
+			"endCaptures": {
+				"0": {
+					"name": "punctuation.section.parens.end.bracket.round.conditional.switch.cpp"
+				}
+			},
+			"name": "meta.conditional.switch.cpp",
+			"patterns": [
+				{
+					"include": "#evaluation_context"
+				}
+			]
+		},
+		"switch_statement": {
+			"begin": "((?:(?:(?:\\s*+(\\/\\*)((?:[^\\*]++|\\*+(?!\\/))*+(\\*\\/))\\s*+)+)|(?:\\s++)|(?<=\\W)|(?=\\W)|^|(?:\\n?$)|(?:\\A)|(?:\\Z)))((?<!\\w)switch(?!\\w))",
+			"end": "(?:(?<=\\}|%>|\\?\\?>)|(?=[;>\\[\\]=]))",
+			"beginCaptures": {
+				"0": {
+					"name": "meta.head.switch.cpp"
+				},
+				"1": {
+					"patterns": [
+						{
+							"include": "#inline_comment"
+						}
+					]
+				},
+				"2": {
+					"name": "comment.block.cpp punctuation.definition.comment.begin.cpp"
+				},
+				"3": {
+					"name": "comment.block.cpp"
+				},
+				"4": {
+					"name": "comment.block.cpp punctuation.definition.comment.end.cpp"
+				},
+				"5": {
+					"name": "keyword.control.switch.cpp"
+				}
+			},
+			"endCaptures": {},
+			"name": "meta.block.switch.cpp",
+			"patterns": [
+				{
+					"begin": "\\G ?",
+					"end": "(?:\\{|<%|\\?\\?<|(?=;))",
+					"beginCaptures": {},
+					"endCaptures": {
+						"0": {
+							"name": "punctuation.section.block.begin.bracket.curly.switch.cpp"
+						}
+					},
+					"name": "meta.head.switch.cpp",
+					"patterns": [
+						{
+							"include": "#switch_conditional_parentheses"
+						},
+						{
+							"include": "$self"
+						}
+					]
+				},
+				{
+					"begin": "(?<=\\{|<%|\\?\\?<)",
+					"end": "\\}|%>|\\?\\?>",
+					"beginCaptures": {},
+					"endCaptures": {
+						"0": {
+							"name": "punctuation.section.block.end.bracket.curly.switch.cpp"
+						}
+					},
+					"name": "meta.body.switch.cpp",
+					"patterns": [
+						{
+							"include": "#default_statement"
+						},
+						{
+							"include": "#case_statement"
+						},
+						{
+							"include": "$self"
+						}
+					]
+				},
+				{
+					"begin": "(?<=\\}|%>|\\?\\?>)[\\s]*",
+					"end": "[\\s]*(?=;)",
+					"beginCaptures": {},
+					"endCaptures": {},
+					"name": "meta.tail.switch.cpp",
+					"patterns": [
+						{
+							"include": "$self"
+						}
+					]
+				}
+			]
+		}
+	},
+	"scopeName": "source.pt"
+}
