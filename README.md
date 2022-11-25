@@ -31,4 +31,5 @@
 #### ........................ 4- and System variables and functions to access platform capabilities
 ##### will have.
 
+### 3- A syntax highlighter plugin for Patrick language, installable on vscode.
 
