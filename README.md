@@ -1,5 +1,5 @@
 # Distributed-processing-on-ESP8266s
-##### This is an academic project related to advanced computer architecture courses and communication networks, which was carried out in the fall of 2022 at the University of Tehran.
+##### This is an academic project related to advanced computer architecture and interconnection networks (NOC) courses. the fall of 2022 at the University of Tehran.
 
 ### Distributed processing on a network of low-power processors
 ###### Due to the fact that the processors in embedded systems have low processing power, it is not possible to perform heavy processing on these types of processors in a reasonable time.
