@@ -14,10 +14,10 @@
 
 ### 1- We build a platform that simulates a series of operating system tasks for us!
 ##### Things like...
-#### ........................ 1- Multi-threaded processing, each thread a CPU!
-#### ........................ 2- Mutual exclusion management
-#### ........................ 3- Syscalls to access specific hardware capabilities
-#### ........................ 4- An interpreter for running programs written in ***Patrick*** scripting language.
+* Multi-threaded processing, each thread a CPU!
+* Mutual exclusion management
+* Syscalls to access specific hardware capabilities
+* An interpreter for running programs written in ***Patrick*** scripting language.
 
 #### Why do we need an interpreter?
 
@@ -25,10 +25,10 @@
 
 ### 2- We're building a new programming language... In honor of the tired starfish, Patrick!
 ##### which features such as:
-#### ........................ 1- Branch_to for execute code blocks on other cores
-#### ........................ 2- Cloud Linker To transfer and execute functions between nodes optimally
-#### ........................ 3- Numerical variables and mathematical expressions for computational tasks
-#### ........................ 4- and System variables and functions to access platform capabilities
+* Branch_to for execute code blocks on other cores
+* Cloud Linker To transfer and execute functions between nodes optimally
+* Numerical variables and mathematical expressions for computational tasks
+* and System variables and functions to access platform capabilities
 ##### will have.
 
 ### 3- A syntax highlighter plugin for Patrick language, installable on vscode.
