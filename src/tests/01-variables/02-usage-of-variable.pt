@@ -1,0 +1,5 @@
+declare: lint number = 3
+declare: F64 fractional = 1.5
+
+syscall: print(number)
+syscall: print(fractional)

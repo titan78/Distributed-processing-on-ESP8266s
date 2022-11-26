@@ -1,0 +1,6 @@
+declare: int var1
+declare: lint var2
+declare: llint var3
+declare: uint var4
+declare: F32 var5
+declare: F64 var6

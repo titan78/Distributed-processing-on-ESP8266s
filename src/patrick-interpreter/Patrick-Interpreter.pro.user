@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 8.0.1, 2022-11-25T17:36:54. -->
+<!-- Written by QtCreator 8.0.1, 2022-11-26T16:09:19. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -221,8 +221,9 @@
     <valuelist type="QVariantList" key="CustomOutputParsers"/>
     <value type="int" key="PE.EnvironmentAspect.Base">2</value>
     <valuelist type="QVariantList" key="PE.EnvironmentAspect.Changes"/>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:F:/UT/Term 1/Computer Achitecture/Project/Code/Patrick-Interpreter/Patrick-Interpreter.pro</value>
-    <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">F:/UT/Term 1/Computer Achitecture/Project/Code/Patrick-Interpreter/Patrick-Interpreter.pro</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">Patrick-Interpreter2</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:F:/UT/Term 1/Computer Achitecture/Project/Distributed-processing-on-ESP8266s/src/patrick-interpreter/Patrick-Interpreter.pro</value>
+    <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">F:/UT/Term 1/Computer Achitecture/Project/Distributed-processing-on-ESP8266s/src/patrick-interpreter/Patrick-Interpreter.pro</value>
     <value type="bool" key="RunConfiguration.UseCppDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
     <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>

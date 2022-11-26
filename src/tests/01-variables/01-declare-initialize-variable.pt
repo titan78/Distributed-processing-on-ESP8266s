@@ -1,0 +1,6 @@
+declare: int var1 = 1000
+declare: lint var2 = 10000
+declare: llint var3 = 100000
+declare: uint var4 = -1000
+declare: F32 var5 = 10.1234
+declare: F64 var6 = 100.123456789
