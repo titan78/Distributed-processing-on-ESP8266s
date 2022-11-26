@@ -32,4 +32,4 @@
 ##### will have.
 
 ### 3- A syntax highlighter plugin for Patrick language, installable on vscode.
-
+* To start using this extension with Visual Studio Code copy it into the `<user home>/.vscode/extensions` folder and restart VSCode.
