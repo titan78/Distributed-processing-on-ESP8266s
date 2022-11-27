@@ -1,8 +1,20 @@
 #include "interpreter.h"
+#include <stdexcept>
+#include <iostream>
+
+Interpreter::Interpreter()
+{
+
+}
 
 Interpreter::Interpreter(const std::string &fileName)
 {
 
+}
+
+bool Interpreter::run(const std::string &code)
+{
+    return this->runCommand(code);
 }
 
 /** ===================================================
@@ -15,19 +27,64 @@ struct Interpreter::DeclarableValue {
 private:
     std::string type;
     std::string name;
-    std::string value = "";
+    std::any value;
     ScopeLevel scope;
-public:
-    DeclarableValue(const std::string& line) {
 
+    std::pair<std::string, std::string> nameAndType(const std::string& line){
+        std::string invalidChars = ".-*+/=+)(^%!~><";
+        std::vector<std::string> typeName;
+        std::string tempBuffer = "";
+        bool withinWord = false;
+        char sep = ' ';
+
+        for(size_t i = 0; i < line.length(); i++){
+            if(line[i] == sep && !withinWord) continue;
+
+            if(line[i] != sep && !withinWord) {
+                withinWord = true;
+            }
+
+            if(line[i] != sep && withinWord){
+                tempBuffer += line[i];
+                if(invalidChars.find(line[i]) != std::string::npos)
+                    throw std::runtime_error("you use invalid chars to define your variable name or use an invalid type name!");
+                if(i != line.size() -1) continue;
+            }
+
+
+            if((line[i] == sep &&  withinWord) || i == line.size() -1) {
+                typeName.push_back(tempBuffer);
+                tempBuffer.clear();
+                withinWord = false;
+            }
+        }
+
+        if(typeName.size() != 2) throw std::runtime_error("invalid instruction, in a line of patrick code, you can create only one variable!");
+
+        return {typeName[0], typeName[1]};
     }
 
-    Value toValue(const ScopeLevel& scope){
+public:
+    DeclarableValue(const std::string& line, Interpreter * interpreter) {
+        size_t indexOfAssign = line.find('=');
 
+        if(indexOfAssign != std::string::npos) {
+            std::tie(this->type, this->name) = nameAndType(line.substr(0, indexOfAssign));
+            this->value = interpreter->stringToTypedAny(this->type, line.substr(indexOfAssign + 1));
+        } else {
+            std::tie(this->type, this->name) = nameAndType(line);
+            this->value = interpreter->stringToTypedAny(this->type, "0");
+        }
+
+        this->scope = interpreter->pcb.scope;
+    }
+
+    Value toValue(){
+        return {this->scope, {this->type, this->value}};
     }
 
     std::string getName() const {
-
+        return this->name;
     }
 };
 
@@ -37,14 +94,14 @@ bool Interpreter::declareVariable(const std::string &line)
 
     try {
 
-        DeclarableValue dv(line);
-        Value newValue = dv.toValue({0,0});
+        DeclarableValue dv(line, this);
+        Value newValue = dv.toValue();
         this->_values.insert({dv.getName(), newValue});
 
-    } catch (...) {
+    } catch (std::exception& e) {
 
         result = false;
-        //exception handler
+        exceptionHandler(e.what());
 
     }
 
@@ -96,7 +153,7 @@ bool Interpreter::runCommand(const std::string &line)
 
     } else { //keyword
         const std::string keyword = line.substr(0, index);
-        const std::string command = line.substr(index);
+        const std::string command = line.substr(index + 1);
 
         switch (keywordStringTokeywordEnum(keyword)) {
         case KWS::BranchTo: break;
@@ -117,6 +174,11 @@ bool Interpreter::runCommand(const std::string &line)
 
     return executionReult;
 }
+
+void Interpreter::exceptionHandler(const std::string &what)
+{
+    std::cout << what + " line: " + pcb.getLineNumber() + ". \n";
+}
 #endif
 
 /** ===================================================
@@ -125,10 +187,6 @@ bool Interpreter::runCommand(const std::string &line)
  *
  *  =================================================== */
 #if defined(PCB_MANAGER)
-struct Interpreter::PCB{
-    ScopeLevel scope;
-};
-
 void Interpreter::pcbManager()
 {
 
@@ -151,6 +209,42 @@ Interpreter::KWS Interpreter::keywordStringTokeywordEnum(const std::string &type
 
     return keywords[type];
 }
+
+std::any Interpreter::stringToTypedAny(const std::string &type, const std::string &value)
+{
+    try {
+        switch(stringTypeToEnumType(type)){
+        case DTS::Int: return std::stoi(value);
+        case DTS::LInt: return std::stol(value);
+        case DTS::LLInt: return std::stoll(value);
+        case DTS::UInt: return std::stoul(value);
+        case DTS::F32: return std::stof(value);
+        case DTS::F64: return std::stod(value);
+        case DTS::InValid: throw std::runtime_error("Invalid Data Type");
+        default: throw "Invalid Data Type";
+        }
+    } catch (std::invalid_argument& e) {
+        throw std::runtime_error("in compatible value and data type!");
+    }
+}
+
+//bool Interpreter::checkValue(const std::string &value)
+//{
+//    std::string validDigits = "0123456789.";
+//    char sign = value[0];
+//    size_t i = 0;
+//    bool result = true;
+
+//    if(sign != '+' || sign == '-') i++;
+
+//    while(i < value.length())
+//        if(validDigits.find(value[i]) == std::string::npos){
+//            result = false;
+//            break;
+//        }
+
+//    return result;
+//}
 
 void Interpreter::invalidKeywordException() noexcept
 {

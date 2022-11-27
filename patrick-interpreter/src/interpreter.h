@@ -8,11 +8,20 @@
 #include <any>
 #include <stack>
 
+#define TEST 1
+
 class Interpreter
 {
 public:
+    Interpreter();
     Interpreter(const std::string& fileName);
     bool run(const std::string& code);
+
+#if TEST == 1
+    std::any getValue(const std::string& name){
+        return _values[name].second.second;
+    }
+#endif
 
 private: // types
     /// @brief first: Type, second: value
@@ -40,21 +49,25 @@ private: // types
      */
     struct DeclarableValue;
 
-    #define DECLARE_FUNCTION
-    /**
-     * @brief The FunctionType class; Each function, when implemented, gets an instance of this structure,
-     *  which holds the beginning and end of the function definition in the code.
-     *  Then, during execution, this object fills its other fields using the fromRawString function and is ready to execute.
-     *  Finally, by using the toExecutableString function,
-     *  the final code of the function that can be executed by the interpreter will be created.
-     */
-    struct FunctionType;
+//    #define DECLARE_FUNCTION
+//    /**
+//     * @brief The FunctionType class; Each function, when implemented, gets an instance of this structure,
+//     *  which holds the beginning and end of the function definition in the code.
+//     *  Then, during execution, this object fills its other fields using the fromRawString function and is ready to execute.
+//     *  Finally, by using the toExecutableString function,
+//     *  the final code of the function that can be executed by the interpreter will be created.
+//     */
+//    struct FunctionType;
 
     #define PCB_MANAGER
     /**
      * @brief process control block
      */
-    struct PCB;
+    struct PCB{
+        ScopeLevel scope = {0,0};
+        size_t lineNumber = 1;
+        std::string getLineNumber() const { return std::to_string(lineNumber); }
+    };
 
     struct calculationMetaData {
         std::string type;
@@ -74,9 +87,6 @@ private: // members
 
     //#define CHECK_SCOPE_COMPATIBILITY
     //checkScopeCompatiblity()
-
-    //#define CHECK_DATA_TYPE
-    //checkDataType()
 
     //#define MATH_OPERATION
     //mathOperation()
@@ -110,6 +120,8 @@ private: // members
     #define RUN_COMMAND
     bool runCommand(const std::string& line);
 
+    void exceptionHandler(const std::string& what);
+
 #ifdef PCB_MANAGER
     void pcbManager();
 #endif
@@ -118,6 +130,9 @@ private: // members
 private: // helper memebers
     DTS stringTypeToEnumType(const std::string& type);
     KWS keywordStringTokeywordEnum(const std::string& type);
+//    bool checkValue(const std::string& value);
+    bool checkDataType(const std::string& type, const std::string& value);
+    std::any stringToTypedAny(const std::string &type, const std::string& value);
 
 
 private: // exceptions
@@ -126,7 +141,8 @@ private: // exceptions
 private: // variables
     /// first: name of value, second: Value Pair
     std::map<std::string, Value> _values;
-    std::map<std::string, FunctionType> _functions;
+//    std::map<std::string, FunctionType> _functions;
+    PCB pcb;
 
     /// calclulation stacks
     std::stack<int> intStack;
