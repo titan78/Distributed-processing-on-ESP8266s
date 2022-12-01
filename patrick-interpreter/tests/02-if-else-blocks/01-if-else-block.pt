@@ -1,0 +1,23 @@
+declare: int num1 = 10
+declare: int num2 = 20
+
+if: num1 == num2
+{
+    declare: lint num3 = 40
+}
+else:
+{
+    declare: F32 d1 = 4.51
+}
+
+declare: int num4 = 11 
+
+if: num4 <= num1
+{
+    declare: F64 d2 = 40.56
+}
+
+/// dar hale piyade sazi hale eberat riyazi hastim
+declare: int result = (num1 + num2) / num4
+
+/// if-else block ha hanooz yekam jaye kar daran

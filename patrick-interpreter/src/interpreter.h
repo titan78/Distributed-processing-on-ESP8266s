@@ -7,20 +7,48 @@
 #include <map>
 #include <any>
 #include <stack>
+#include <stdexcept>
+#include <fstream>
+#include <sstream>
+#include <limits>
+#include <stdarg.h>
+#include <algorithm>
 
 #define TEST 1
+
+#if TEST == 1
+#include <iostream>
+#endif
 
 class Interpreter
 {
 public:
     Interpreter();
     Interpreter(const std::string& fileName);
-    bool run(const std::string& code);
+    bool runOneCommand(const std::string& code);
+    void runMultipleCommands(const std::string& code);
 
 #if TEST == 1
     std::any getValue(const std::string& name){
-        return _values[name].second.second;
+        return _values[name].second;
     }
+
+    std::vector<std::string> getValueNames(){
+        std::vector<std::string> keys;
+        for (const auto& [key, value] : _values)
+        {
+            keys.push_back(key);
+        }
+        return keys;
+    }
+
+    void printValues(){
+        for (const auto& [key, value] : _values)
+        {
+            std::cout << key << " -> type: " << value.first << " and has value: " << value.second.has_value() << std::endl;
+        }
+    }
+
 #endif
 
 private: // types
@@ -30,16 +58,19 @@ private: // types
     /// @brief first: level (prent-child), second: sub-level (brotherhood)
     typedef std::pair<unsigned int, unsigned int> ScopeLevel;
 
-    /** @brief first: ScopeLevel object, second: TypedValue
-     *  @details Before accessing the variable, the scope must be checked
-     */
-    typedef std::pair<ScopeLevel, TypedValue> Value;
+//    /** @brief first: ScopeLevel object, second: TypedValue
+//     *  @details Before accessing the variable, the scope must be checked
+//     */
+//    typedef std::pair<ScopeLevel, TypedValue> Value;
 
     /// @brief data types
     enum class DTS{InValid, Int, LInt, LLInt, UInt, F32, F64};
 
     /// @brief keywords
-    enum class KWS{Declare, Syscall, If, Else, Loop, Return, BranchTo, Function};
+    enum class KWS{Declare, Syscall, If, Else, Loop, Return, BranchTo, Function, Invoke};
+
+    /// @brief keywords
+    enum class BOPS{EQ, GTEQ, LTEQ, GT, LT, NEQ};
 
     #define DECLARE_VARIABLE
     /**
@@ -59,19 +90,22 @@ private: // types
 //     */
 //    struct FunctionType;
 
+#define IF_ELSE_BLOCK
+    struct IfElseBlock;
+
     #define PCB_MANAGER
     /**
      * @brief process control block
      */
-    struct PCB{
-        ScopeLevel scope = {0,0};
-        size_t lineNumber = 1;
-        std::string getLineNumber() const { return std::to_string(lineNumber); }
-    };
+    struct PCB;
 
-    struct calculationMetaData {
+    /**
+     * @brief The calculationMetaData class:
+     * This structure determines the index at which each of our variables is placed in the stack specific to its type
+     */
+    struct CalculationMetaData {
         std::string type;
-        int index;
+        std::size_t index;
     };
 
 private: // members
@@ -79,20 +113,15 @@ private: // members
     bool declareVariable(const std::string& line);
 #endif
 
-    //#define ACCESS_VARIABLE
-    //accessVariable()
+#define CHECK_ACCESS_VARIABLE
+    std::string checkAccessToVariableAndScopizeName(const std::string& name);
 
-    //#define CHANGE_VARIABLE
-    //changeVariable()
+#define CHANGE_VARIABLE
+    void changeVariable(const std::string& name, const std::string &value);
 
-    //#define CHECK_SCOPE_COMPATIBILITY
-    //checkScopeCompatiblity()
-
-    //#define MATH_OPERATION
-    //mathOperation()
-
-    //#define IF_ELSE_BLOCK
-    //ifElseBlock()
+#ifdef IF_ELSE_BLOCK
+    void ifElseBlock(const std::string &line);
+#endif
 
     //#define LOOP_BLOCK
     //loop()
@@ -113,7 +142,6 @@ private: // members
     //#define SOLVE_EXPRESSION
     //solveExpression()
 
-//    #define DECLARE_FUNCTION
     /*cloudLinker() --> Due to the lack of resources in ESPs, we do not have the ability to precompile,
      *                  so we have to create a cloud link between calls and implementations of functions. */
 
@@ -123,26 +151,41 @@ private: // members
     void exceptionHandler(const std::string& what);
 
 #ifdef PCB_MANAGER
-    void pcbManager();
+    void pcbManager(const std::string &line, bool file);
 #endif
 
-
 private: // helper memebers
+    void checkScopeCompatiblity(const std::string& name);
     DTS stringTypeToEnumType(const std::string& type);
     KWS keywordStringTokeywordEnum(const std::string& type);
-//    bool checkValue(const std::string& value);
-    bool checkDataType(const std::string& type, const std::string& value);
-    std::any stringToTypedAny(const std::string &type, const std::string& value);
-
+    BOPS operatorStringToOperatorEnum(const std::string& type);
+    bool checkValue(const std::string &value);
+    void checkDataTypeOnOperation(int n, ...);
+    std::any stringToTypedAny(const std::string &type, const std::string &value);
+    ScopeLevel scopeFromName(const std::string& name) const noexcept;
+    void goTo(size_t line);
+    std::pair<std::string, size_t> getWordAndItsEnd(const std::string& line, int start = 0);
+    void variableAndTypeNameValidator(const std::string& name);
+    std::string scopizeName(const std::string &name, const ScopeLevel &scope);
+    CalculationMetaData loadValueToItsStack(const std::string& name);
+    bool booleanOperation(const std::string &type, const std::string &op);
+    void trimLeft(std::string &string);
+    void trimRight(std::string &string);
+    void trim(std::string &string);
+    std::string trimLeft_copy(std::string string);
+    std::string trimRight_copy(std::string string);
+    std::string trim_copy(std::string string);
+    std::string removeSpaces(const std::string& string);
+    bool isNumber(const std::string& string);
 
 private: // exceptions
     void invalidKeywordException() noexcept;
 
 private: // variables
     /// first: name of value, second: Value Pair
-    std::map<std::string, Value> _values;
+    std::map<std::string, TypedValue> _values;
 //    std::map<std::string, FunctionType> _functions;
-    PCB pcb;
+    PCB* pcb;
 
     /// calclulation stacks
     std::stack<int> intStack;
@@ -151,17 +194,13 @@ private: // variables
     std::stack<unsigned int> uintStack;
     std::stack<float> f32Stack;
     std::stack<double> f64Stack;
-    std::map<std::string, calculationMetaData> metadata;
+    std::map<std::string, CalculationMetaData> metadata;
     std::stack<std::string> calculationStack;
 //    std::stack<long double> f128Stack;
+    std::ifstream * file;
+    bool exceptionOrTerminate;
 
 private: // constants
-//    std::map<std::string, DTS> _dataTypes =
-//        {{"int", DTS::Int}, {"lint", DTS::LInt}, {"llint", DTS::LLInt}, {"uint", DTS::UInt}, {"F32", DTS::F32}, {"F64", DTS::F64}};
-
-//    std::map<std::string, KWS> _keywords =
-//        {{"declare", KWS::Declare}, {"branch_to", KWS::BranchTo}, {"function", KWS::Function},
-//         {"return", KWS::Return}, {"if", KWS::If}, {"Else", KWS::Else}, {"loop", KWS::Loop}, {"syscall", KWS::Syscall}};
 
 };
 
