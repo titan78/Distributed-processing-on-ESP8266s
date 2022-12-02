@@ -121,7 +121,7 @@ void test_7_change_variable(){
     i.runMultipleCommands("declare: lint num1 = 10 \n"
                           "declare: lint num2 = 20 \n"
                           "declare: F64 num3 \n"
-                          "if: num1 != num2 \n"
+                          "if: num1 == num2 \n"
                           "{\n"
                           "num3 = 0.0001 \n"
                           "}\n"
@@ -140,6 +140,103 @@ void test_7_change_variable(){
     std::cout << "\n\n\n" << std::endl;
 }
 
+void test_8_lvalue_condition(){
+    Interpreter i;
+    i.runMultipleCommands("declare: lint num1 = 10 \n"
+                          "declare: lint num2 = 20 \n"
+                          "declare: F64 num3 \n"
+                          "if: num1 == 40 \n"
+                          "{\n"
+                          "num3 = 0.0001 \n"
+                          "}\n"
+                          "else: \n"
+                          "{ \n"
+                          "num3 = 0.0002 \n"
+                          "} \n"
+                          );
+
+    i.printValues();
+
+    std::cout << std::any_cast<long>(i.getValue("num1:0.0")) << std::endl;
+    std::cout << std::any_cast<long>(i.getValue("num2:0.0")) << std::endl;
+    std::cout << std::any_cast<double>(i.getValue("num3:0.0")) << std::endl;
+
+    std::cout << "\n\n\n" << std::endl;
+}
+
+void test_9_lvalue_condition(){
+    Interpreter i;
+    i.runMultipleCommands("declare: lint num1 = 10 \n"
+                          "declare: lint num2 = 20 \n"
+                          "declare: F64 num3 \n"
+                          "if: 40 == num2 \n"
+                          "{\n"
+                          "num3 = 0.0001 \n"
+                          "}\n"
+                          "else: \n"
+                          "{ \n"
+                          "num3 = 0.0002 \n"
+                          "} \n"
+                          );
+
+    i.printValues();
+
+    std::cout << std::any_cast<long>(i.getValue("num1:0.0")) << std::endl;
+    std::cout << std::any_cast<long>(i.getValue("num2:0.0")) << std::endl;
+    std::cout << std::any_cast<double>(i.getValue("num3:0.0")) << std::endl;
+
+    std::cout << "\n\n\n" << std::endl;
+}
+
+void test_10_lvalue_condition(){
+    Interpreter i;
+    i.runMultipleCommands("declare: lint num1 = 10 \n"
+                          "declare: lint num2 = 20 \n"
+                          "declare: F64 num3 \n"
+                          "if: 40 == 40 \n"
+                          "{\n"
+                          "num3 = 0.0001 \n"
+                          "}\n"
+                          "else: \n"
+                          "{ \n"
+                          "num3 = 0.0002 \n"
+                          "} \n"
+                          );
+
+    i.printValues();
+
+    std::cout << std::any_cast<long>(i.getValue("num1:0.0")) << std::endl;
+    std::cout << std::any_cast<long>(i.getValue("num2:0.0")) << std::endl;
+    std::cout << std::any_cast<double>(i.getValue("num3:0.0")) << std::endl;
+
+    std::cout << "\n\n\n" << std::endl;
+}
+
+void test_11_lvalue_condition(){
+    Interpreter i;
+    i.runMultipleCommands("declare: lint num1 = 10 \n"
+                          "declare: lint num2 = 20 \n"
+                          "declare: F64 num3 \n"
+                          "if: 40 == 50 \n"
+                          "{\n"
+                          "num3 = 0.0001 \n"
+                          "}\n"
+                          "else: \n"
+                          "{ \n"
+                          "num3 = 0.0002 \n"
+                          "} \n"
+                          );
+
+    i.printValues();
+
+    std::cout << std::any_cast<long>(i.getValue("num1:0.0")) << std::endl;
+    std::cout << std::any_cast<long>(i.getValue("num2:0.0")) << std::endl;
+    std::cout << std::any_cast<double>(i.getValue("num3:0.0")) << std::endl;
+
+    std::cout << "\n\n\n" << std::endl;
+}
+
+
 int main()
 {
     //    test_1_vriable_declaration();
@@ -147,12 +244,15 @@ int main()
     //    test_3_if_else();
     //    test_4_if_else();
     //    test_5_if_else();
-//        test_6_if_else_file();
-    test_7_change_variable();
+    //        test_6_if_else_file();
+    //    test_7_change_variable();
+    //    test_8_lvalue_condition();
+    //    test_9_lvalue_condition();
+    //    test_10_lvalue_condition();
+    //    test_11_lvalue_condition();
 
-
-//    Interpreter i;
-//    std::cout << sizeof(i) << "\n";
+    //    Interpreter i;
+    //    std::cout << sizeof(i) << "\n";
 }
 
 

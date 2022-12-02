@@ -108,6 +108,12 @@ private: // types
         std::size_t index;
     };
 
+    #define LOOP_BLOCK
+    /**
+     * @brief The LoopState structure:
+     */
+    struct LoopState;
+
 private: // members
 #ifdef DECLARE_VARIABLE
     bool declareVariable(const std::string& line);
@@ -123,8 +129,9 @@ private: // members
     void ifElseBlock(const std::string &line);
 #endif
 
-    //#define LOOP_BLOCK
-    //loop()
+#ifdef LOOP_BLOCK
+    bool loop(const std::string& line);
+#endif
 
 #ifdef DECLARE_FUNCTION
     bool declareFunction(const std::string& line);
@@ -167,8 +174,15 @@ private: // helper memebers
     std::pair<std::string, size_t> getWordAndItsEnd(const std::string& line, int start = 0);
     void variableAndTypeNameValidator(const std::string& name);
     std::string scopizeName(const std::string &name, const ScopeLevel &scope);
+    ///for variables
     CalculationMetaData loadValueToItsStack(const std::string& name);
+    ///for lvalue
+    CalculationMetaData loadValueToItsStack(const std::string& type, const std::string &value);
+    //load value base
+    CalculationMetaData loadValueToItsStack(const std::string& type, const std::any &value);
     bool booleanOperation(const std::string &type, const std::string &op);
+    bool isVariable(const std::string& string);
+    bool isLvalueFloat(const std::string& string);
     void trimLeft(std::string &string);
     void trimRight(std::string &string);
     void trim(std::string &string);
@@ -177,6 +191,8 @@ private: // helper memebers
     std::string trim_copy(std::string string);
     std::string removeSpaces(const std::string& string);
     bool isNumber(const std::string& string);
+    std::pair<size_t, size_t> findLoopOperator(const std::string& line);
+    std::string loopOperatorToLogicalOperator(const std::string& op);
 
 private: // exceptions
     void invalidKeywordException() noexcept;
@@ -185,7 +201,6 @@ private: // variables
     /// first: name of value, second: Value Pair
     std::map<std::string, TypedValue> _values;
 //    std::map<std::string, FunctionType> _functions;
-    PCB* pcb;
 
     /// calclulation stacks
     std::stack<int> intStack;
@@ -196,9 +211,11 @@ private: // variables
     std::stack<double> f64Stack;
     std::map<std::string, CalculationMetaData> metadata;
     std::stack<std::string> calculationStack;
-//    std::stack<long double> f128Stack;
-    std::ifstream * file;
+
     bool exceptionOrTerminate;
+
+    std::ifstream * file;
+    PCB* pcb;
 
 private: // constants
 

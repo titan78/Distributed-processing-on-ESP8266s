@@ -1,5 +1,20 @@
 #include "interpreter.h"
 
+struct Interpreter::LoopState{
+    int loopBlockLine;
+    std::string dest;
+    std::string start;
+    std::string op;
+    std::string step;
+    void increaseStart(Interpreter* interpreter){
+        interpreter->runCommand(start + " = " + start + " + " + step);
+    }
+
+    std::string generateBoolExpression(){
+        return start + " " + op + " " + dest;
+    }
+};
+
 /** ===================================================
  *
  *                  PCB manager
@@ -32,6 +47,9 @@ struct Interpreter::PCB{
 
     void scopeManager(const std::string& line, Interpreter * interpreter){
         if(line.find("else:") != std::string::npos) setWithinElseBlock(true);
+
+        if(line.find("loop:") != std::string::npos) scope.second++;
+
         if(!isRunAllowed() &&!isWithinIfBlock() && !isWithinElseBlock()) setRunAllowed(true);
 
         if(line.find('{') != std::string::npos)
@@ -42,6 +60,7 @@ struct Interpreter::PCB{
         else if(line.find('}') != std::string::npos)
         {
             removeVariablesAllocatedInThisScope(interpreter);
+            //  تشخیص ترتیب اینا نیاز به یک استک داره
             if(isWithinIfBlock()) {
                 setRunAllowed(!isRunAllowed());
                 setWithinIfBlock(false);
@@ -52,7 +71,22 @@ struct Interpreter::PCB{
                 setWithinElseBlock(false);
             }
 
-            scope.first -= 1;
+            if(isWithinLoopBlock()){
+                _loop->increaseStart(interpreter);
+                interpreter->ifElseBlock(_loop->generateBoolExpression());
+                if(isRunAllowed()){
+                    goTo(_loop->loopBlockLine, interpreter);
+                } else {
+                    scope.first--;
+                    removeVariablesAllocatedInThisScope(interpreter);
+                    scope.first++;
+                    scope.second--;
+                    setRunAllowed(true);
+                    freeLoop();
+                }
+            }
+
+            scope.first--;
             _curlyBraces--;
         }
     }
@@ -98,10 +132,20 @@ struct Interpreter::PCB{
         return _withinElseBlock;
     }
 
-    void setWithinElseBlock(bool newWithinIfBlock)
+    void setWithinElseBlock(bool newWithinElseBlock)
     {
-        _withinElseBlock = newWithinIfBlock;
+        _withinElseBlock = newWithinElseBlock;
     }
+
+    bool isWithinLoopBlock() const
+    {
+        return _loop;
+    }
+
+    //    void setWithinLoopBlock(bool newWithinLoopBlock)
+    //    {
+    //        _withinLoopBlock = newWithinLoopBlock;
+    //    }
 
     bool isRunAllowed() const {
         return _runAllowed;
@@ -117,6 +161,19 @@ struct Interpreter::PCB{
     }
 
     size_t condition() const { return _condition; }
+
+    void setLoop(LoopState * loop){
+        _loop = loop;
+    }
+
+    LoopState * loop(){
+        return _loop;
+    }
+
+    void freeLoop(){
+        free(_loop);
+        _loop = nullptr;
+    }
 
 private:
     void removeVariablesAllocatedInThisScope(Interpreter * interpreter){
@@ -140,6 +197,7 @@ private:
     size_t _invokeLineNumber;
     size_t _lineNumber = 1;
     size_t _curlyBraces = 0;
+    LoopState * _loop = nullptr;
 };
 
 void Interpreter::pcbManager(const std::string& line, bool file = false)
@@ -151,8 +209,9 @@ void Interpreter::pcbManager(const std::string& line, bool file = false)
 
     if(file) {
         pcb->goTo(pcb->nextLineNumber(), this);
-        if(pcb->isWithinFunctionCall())
-            pcb->functionManager(line);
+        pcb->scopeManager(line, this);
+        //        if(pcb->isWithinFunctionCall())
+        //            pcb->functionManager(line);
     }
 }
 #endif
@@ -167,7 +226,7 @@ Interpreter::Interpreter() : pcb(new PCB)
 
 }
 
-Interpreter::Interpreter(const std::string &fileName) : pcb(new PCB), file(new std::ifstream(fileName))
+Interpreter::Interpreter(const std::string &fileName) : file(new std::ifstream(fileName)), pcb(new PCB)
 {
     file->close();
     file->open(fileName, std::fstream::in);
@@ -179,7 +238,7 @@ Interpreter::Interpreter(const std::string &fileName) : pcb(new PCB), file(new s
 
     std::string line;
     while(std::getline(*this->file, line)){
-        pcbManager(line);
+        pcbManager(line, true);
         if(pcb->isRunAllowed()) runCommand(line);
     }
 }
@@ -227,7 +286,22 @@ private:
     std::any value;
     ScopeLevel scope;
 
-    std::pair<std::string, std::string> nameAndType(const std::string& line, Interpreter * interpreter){
+public:
+    DeclarableValue(const std::string& line, Interpreter * interpreter) {
+        size_t indexOfAssign = line.find('=');
+
+        if(indexOfAssign != std::string::npos) {
+            std::tie(this->type, this->name) = nameAndType(line.substr(0, indexOfAssign), interpreter);
+            this->value = interpreter->stringToTypedAny(this->type, interpreter->trim_copy(line.substr(indexOfAssign + 1)));
+        } else {
+            std::tie(this->type, this->name) = nameAndType(line, interpreter);
+            this->value = interpreter->stringToTypedAny(this->type, "0");
+        }
+
+        this->scope = interpreter->pcb->scope;
+    }
+
+    static std::pair<std::string, std::string> nameAndType(const std::string& line, Interpreter * interpreter){
         std::vector<std::string> typeName;
         std::string word; size_t index;
 
@@ -242,21 +316,6 @@ private:
             throw std::runtime_error("invalid instruction, in a line of patrick code, you can create only one variable!");
 
         return {typeName[0], interpreter->scopizeName(typeName[1], interpreter->pcb->scope)};
-    }
-
-public:
-    DeclarableValue(const std::string& line, Interpreter * interpreter) {
-        size_t indexOfAssign = line.find('=');
-
-        if(indexOfAssign != std::string::npos) {
-            std::tie(this->type, this->name) = nameAndType(line.substr(0, indexOfAssign), interpreter);
-            this->value = interpreter->stringToTypedAny(this->type, interpreter->trim_copy(line.substr(indexOfAssign + 1)));
-        } else {
-            std::tie(this->type, this->name) = nameAndType(line, interpreter);
-            this->value = interpreter->stringToTypedAny(this->type, "0");
-        }
-
-        this->scope = interpreter->pcb->scope;
     }
 
     TypedValue toValue(){
@@ -409,51 +468,85 @@ void Interpreter::ifElseBlock(const std::string& line)
         if(index != std::string::npos){
             badOperator = false;
             std::string fop = getWordAndItsEnd(line.substr(0, index)).first;
-            variableAndTypeNameValidator(fop);
             std::string sop = getWordAndItsEnd(line.substr(index + op.length())).first;
-            variableAndTypeNameValidator(sop);
-            CalculationMetaData fop_m = loadValueToItsStack(fop);
-            fop.clear();
-            CalculationMetaData sop_m = loadValueToItsStack(sop);
-            sop.clear();
-            checkDataTypeOnOperation(2, fop_m.type.c_str(), sop_m.type.c_str());
-            pcb->setIfElseMetaData(booleanOperation(fop_m.type, op));
+
+            if(isVariable(fop)){
+                variableAndTypeNameValidator(fop);
+                CalculationMetaData fop_m = loadValueToItsStack(fop);
+                fop.clear();
+
+                if(isVariable(sop)){ //both are variable
+                    variableAndTypeNameValidator(sop);
+                    CalculationMetaData sop_m = loadValueToItsStack(sop);
+                    sop.clear();
+                    checkDataTypeOnOperation(2, fop_m.type.c_str(), sop_m.type.c_str());
+                } else { // first is variable and second is lvalue
+                    CalculationMetaData sop_m = loadValueToItsStack(fop_m.type, sop);
+                    sop.clear();
+                }
+                pcb->setIfElseMetaData(booleanOperation(fop_m.type, op));
+            } else {
+                if(isVariable(sop)){ // first is lvalue and second is variable
+                    variableAndTypeNameValidator(sop);
+                    CalculationMetaData sop_m = loadValueToItsStack(sop);
+                    sop.clear();
+                    CalculationMetaData fop_m = loadValueToItsStack(sop_m.type, fop);
+                    sop.clear();
+                    pcb->setIfElseMetaData(booleanOperation(fop_m.type, op));
+                } else { // both are lvalue
+                    std::string type = isLvalueFloat(fop) ? "F64" : "int";
+                    CalculationMetaData fop_m = loadValueToItsStack(type, fop);
+                    fop.clear();
+                    CalculationMetaData sop_m = loadValueToItsStack(type, sop);
+                    sop.clear();
+                    pcb->setIfElseMetaData(booleanOperation(type, op));
+                }
+            }
+
             break;
         }
     }
 
     if(badOperator) throw std::runtime_error("Bad Operator");
 }
-#endif
 
 Interpreter::CalculationMetaData Interpreter::loadValueToItsStack(const std::string &name)
 {
     const auto& value = _values[checkAccessToVariableAndScopizeName(name)];
+    return loadValueToItsStack(value.first, value.second);
+}
 
-    switch (stringTypeToEnumType(value.first)) {
+Interpreter::CalculationMetaData Interpreter::loadValueToItsStack(const std::string &type, const std::string &value)
+{
+    return loadValueToItsStack(type, stringToTypedAny(type, value));
+}
+
+Interpreter::CalculationMetaData Interpreter::loadValueToItsStack(const std::string &type, const std::any &value)
+{
+    switch (stringTypeToEnumType(type)) {
     case DTS::Int:
-        intStack.push(std::any_cast<int>(value.second));
-        return {value.first, intStack.size() - 1};
+        intStack.push(std::any_cast<int>(value));
+        return {type, intStack.size() - 1};
 
     case DTS::LInt:
-        lintStack.push(std::any_cast<long>(value.second));
-        return {value.first, lintStack.size() - 1};
+        lintStack.push(std::any_cast<long>(value));
+        return {type, lintStack.size() - 1};
 
     case DTS::LLInt:
-        llintStack.push(std::any_cast<long long>(value.second));
-        return {value.first, llintStack.size() - 1};
+        llintStack.push(std::any_cast<long long>(value));
+        return {type, llintStack.size() - 1};
 
     case DTS::UInt:
-        uintStack.push(std::any_cast<unsigned int>(value.second));
-        return {value.first, uintStack.size() - 1};
+        uintStack.push(std::any_cast<unsigned int>(value));
+        return {type, uintStack.size() - 1};
 
     case DTS::F32:
-        f32Stack.push(std::any_cast<float>(value.second));
-        return {value.first, f32Stack.size() - 1};
+        f32Stack.push(std::any_cast<float>(value));
+        return {type, f32Stack.size() - 1};
 
     case DTS::F64:
-        f64Stack.push(std::any_cast<double>(value.second));
-        return {value.first, f64Stack.size() - 1};
+        f64Stack.push(std::any_cast<double>(value));
+        return {type, f64Stack.size() - 1};
 
     case DTS::InValid: throw std::runtime_error("Invalid Data Type");
     default: throw "Invalid Data Type";
@@ -462,7 +555,6 @@ Interpreter::CalculationMetaData Interpreter::loadValueToItsStack(const std::str
 
 bool Interpreter::booleanOperation(const std::string& type, const std::string& op)
 {
-
     auto helper = [this, op] (auto oper1, auto oper2){
         switch (operatorStringToOperatorEnum(op)) {
         case BOPS::EQ: return oper1 == oper2;
@@ -517,6 +609,87 @@ bool Interpreter::booleanOperation(const std::string& type, const std::string& o
     default: throw "Invalid Data Type";
     }
 }
+
+bool Interpreter::isVariable(const std::string &string)
+{
+    return !isNumber(string);
+}
+
+bool Interpreter::isLvalueFloat(const std::string &string)
+{
+    return (string.find(".") != std::string::npos);
+}
+#endif
+
+/** ===================================================
+ *
+ *                     loop block
+ *
+ *  =================================================== */
+#if defined(LOOP_BLOCK)
+
+bool Interpreter::loop(const std::string &line)
+{
+    // check this line has how may ,s
+    const std::string::difference_type count = std::count(line.begin(), line.end(), '_');
+
+    //exception
+    if(count  != 1) return false;
+
+    //exception
+    size_t opFIndx, opLIndx;
+    std::tie(opFIndx, opLIndx) = findLoopOperator(line);
+    if(opFIndx == std::string::npos) return false;
+
+    size_t stepIndex = line.find("step");
+    if(stepIndex != std::string::npos && stepIndex < opLIndx) return false;
+
+    std::string secondPart = line.substr(opLIndx + 1);
+    size_t assignIndex = secondPart.find("=");
+    if(assignIndex == std::string::npos) return false;
+
+    std::string initPart = line.substr(0, opFIndx);
+    trim(initPart);
+    secondPart = removeSpaces(secondPart);
+
+    declareVariable(initPart);
+    LoopState * ls = new LoopState();
+    ls->start = DeclarableValue::nameAndType(initPart, this).second;
+    ls->dest = initPart.substr(opLIndx + 1);
+    ls->op = loopOperatorToLogicalOperator(line.substr(opFIndx, opLIndx + 1));
+    ls->step = secondPart.substr(assignIndex + 1);
+    ls->loopBlockLine = pcb->getLineNumber();
+    pcb->setLoop(ls);
+
+    return true;
+}
+
+std::pair<size_t, size_t> Interpreter::findLoopOperator(const std::string &line)
+{
+    std::vector<std::string> operators = {"up_to", "up_to_eq", "down_to", "down_to_eq"};
+    size_t index, size;
+
+    for(auto& op : operators){
+        index = line.find(op);
+        if(index != std::string::npos){
+            size = op.length();
+            goto ret;
+        }
+    }
+
+ret:
+    return {index, size};
+}
+
+std::string Interpreter::loopOperatorToLogicalOperator(const std::string &op)
+{
+    std::map<std::string, std::string> ops =
+        {{"up_to", "<"}, {"up_to_eq", "<="}, {"down_to", ">"}, {"down_to_eq", ">="}};
+
+    return ops[op];
+}
+
+#endif
 
 void Interpreter::trimLeft(std::string &string)
 {
@@ -667,7 +840,6 @@ void Interpreter::checkScopeCompatiblity(const std::string& name)
 
     throw std::runtime_error("Undefined Behavior! function -> accessVariable, args -> " + name);
 }
-
 
 /** ===================================================
  *

@@ -37,7 +37,7 @@ branch_to: auto
 
 if: CPU_ID == 0
 {
-    loop: i = 1 up_to CPUS, step = 1
+    loop: int i = 1 up_to CPUS, step = 1
     {
         branch_to: CPU__i
         {
@@ -55,7 +55,7 @@ function: factorial(lint number) => int
         return: fact
     }
 
-    loop: i = 1 up_to_eq number, step = 1
+    loop: llint i = 1 up_to_eq number, step = 1
     {
         fact *= i
     }
@@ -65,7 +65,7 @@ function: factorial(lint number) => int
 
 branch_to: CPU3
 {
-    loop: i = 1 up_to_eq 100, step = 1
+    loop: int i = 1 up_to_eq 100, step = 1
     {
         declare: int fact = factorial(i)
         syscall: print(fact)
