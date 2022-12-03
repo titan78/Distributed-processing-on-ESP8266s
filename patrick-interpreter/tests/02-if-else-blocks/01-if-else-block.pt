@@ -20,4 +20,5 @@ if: num4 <= num1
 /// dar hale piyade sazi hale eberat riyazi hastim
 declare: int result = (num1 + num2) / num4
 
+
 /// if-else block ha hanooz yekam jaye kar daran
